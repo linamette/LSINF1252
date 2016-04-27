@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "fractal.h"
 
 struct fractal *fractal_new(const char *name, int width, int height, double a, double b)
@@ -10,7 +11,7 @@ struct fractal *fractal_new(const char *name, int width, int height, double a, d
         exit(EXIT_FAILURE);
     }
 
-    fract->image[width][height];
+    fract->value[width][height];
     fract->name = name;
     fract->width = width;
     fract->height = height;
@@ -27,19 +28,17 @@ void fractal_free(struct fractal *f)
 
 const char *fractal_get_name(const struct fractal *f)
 {
-    /* TODO */
-    return NULL;
+    return f->name;
 }
 
 int fractal_get_value(const struct fractal *f, int x, int y)
 {
-    /* TODO */
-    return 0;
+    return f->value[x][y];
 }
 
 void fractal_set_value(struct fractal *f, int x, int y, int val)
 {
-    /* TODO */
+    f->value[x][y] = val;
 }
 
 int fractal_get_width(const struct fractal *f)
