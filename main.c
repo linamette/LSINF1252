@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "fractal.h"
 
-<<<<<<< HEAD
+
 int main(int argc, char* argv[]) {
 
     char thread[] = "--maxthreads";
@@ -15,15 +15,4 @@ int main(int argc, char* argv[]) {
     int maxthreads = 1;
 
     while ()
-
-
-
-=======
-int main(int argc, char *argv[])
-{
-    char test1[]="-d";
-    char test2[]="--maxthreads";
->>>>>>> 85001f906ccabbb823f6b6aad89ffa7bae5c703b
-    return 0;
 }
-
