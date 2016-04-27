@@ -1,10 +1,24 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "fractal.h"
 
 struct fractal *fractal_new(const char *name, int width, int height, double a, double b)
 {
-    /* TODO */
-    return NULL;
+    struct fractal *fract = (struct fractal*) malloc(sizeof(struct fractal));
+    if (fract == NULL)
+    {
+        printf("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    fract->image[width][height];
+    fract->name = name;
+    fract->width = width;
+    fract->height = height;
+    fract->a = a;
+    fract->b = b;
+    
+    return fract;
 }
 
 void fractal_free(struct fractal *f)

@@ -2,7 +2,12 @@
 #define _FRACTAL_H
 
 struct fractal {
-    /* TODO: à remplir */
+	char *name;
+	int width;
+	int height;
+	double a;
+	double b;
+	int image[0][0];
 };
 
 /*
