@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "fractal.h"
 
 struct fractal *fractal_new(const char *name, int width, int height, double a, double b)
@@ -11,14 +10,14 @@ struct fractal *fractal_new(const char *name, int width, int height, double a, d
         exit(EXIT_FAILURE);
     }
 
-    fract->value[width][height];
+    fract->image[width][height];
     fract->name = name;
     fract->width = width;
     fract->height = height;
     fract->a = a;
     fract->b = b;
     
-    return fract;
+    return fract; 
 }
 
 void fractal_free(struct fractal *f)
@@ -28,39 +27,41 @@ void fractal_free(struct fractal *f)
 
 const char *fractal_get_name(const struct fractal *f)
 {
-	return f->name;
+    /* TODO */
+    return NULL;
 }
 
 int fractal_get_value(const struct fractal *f, int x, int y)
 {
-	return f->value[x][y];
+    /* TODO */
+    return 0;
 }
 
 void fractal_set_value(struct fractal *f, int x, int y, int val)
 {
-    f->value[x][y] = val;
+    /* TODO */
 }
 
 int fractal_get_width(const struct fractal *f)
 {
-    /* TODO */
-    return 0;
+    int width = f-> width;
+    return width;
 }
 
 int fractal_get_height(const struct fractal *f)
 {
-    /* TODO */
-    return 0;
+    int height = f-> height;
+    return height;
 }
 
 double fractal_get_a(const struct fractal *f)
 {
-    /* TODO */
-    return 0;
+    double a = f->a;
+    return a;
 }
 
 double fractal_get_b(const struct fractal *f)
 {
-    /* TODO */
-    return 0;
+    double b = f->b;
+    return b;
 }
