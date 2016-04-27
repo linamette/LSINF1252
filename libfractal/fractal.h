@@ -7,7 +7,7 @@ struct fractal {
 	int height;
 	double a;
 	double b;
-	int image[0][0];
+	int value[0][0];
 };
 
 /*
