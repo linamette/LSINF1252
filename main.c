@@ -1,42 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "fractal.h"
+#include <string.h>
+#include "libfractal/fractal.h"
 
-int main(int argc, char *argv[])
-{
-    char test1[]="-d";
-    char test2[]="--maxthreads";
+int main(int argc, char* argv[]) {
 
-    const char *t1 = &test1[0];
-    const char *t2 = &test2[0];
-    const char *t3;
+	/******************* Gère les différentes entrées possibles *******************/
 
-    int i = 0;
+    int optionD = 0;
+    int files = argc-1;
+    int maxthreads = 1;
+    int thread = 0;
+    char **filesName;
 
+    int count = 1;
 
-    while(i < argc)
-    {
-    	t3 = (const char *)argv[i];
-    	if(strcmp(t1,t3) == 0)
-    	{
-    		/*si jamais l'argument courant est -d*/
+    while (count <= argc) {
+    	if (strcmp(argv[count], "--maxthreads") == 0) {
+    		thread = count;
+    		maxthreads = atoi(argv[count+1]);
     	}
-    	else if(strcmp(t2,t3) == 0)
-    	{
-    		/*si jamais l'argument courant */
+    	if (strcmp(argv[count], "-d") == 0) {
+    		optionD = count;
     	}
-    	else if(*(argv[i]) = '-')
-    	{
-    		/*si jamais l'argument courant est '-' */
-    	}
-    	else
-    	{
-    		/*si non*/
-    	}
-
-    	i++;
+    	count++;
     }
-    return 0;
-}
 
+    if (thread != 1) {
+    	files = files-2;
+   	}
+   	if (optionD != 1) {
+   		files = files-1;
+   	}
+
+   	int i = 0;
+   	int j = 1;
+   	while (files > 0) {
+   		if (j != thread && j != optionD && j != thread+1) {
+   			filesName[i] = argv[j];
+   			i++;
+   			j++;
+   			files--;
+   		}
+   		j++;
+   	}
+}
