@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "libfractal/fractal.h"
+#include "libfractal/tools.c"
 
 char* add_char(char *word, char add)
 {
@@ -14,33 +15,47 @@ char* add_char(char *word, char add)
   	return stock;
 }
 
-void fractal (struct fractal *fractal) {
+/************* Calcul de la fractal et transformation en Bitmap *********************/
+
+void fractal_calcul (struct fractal *fractal) {
 	int i;
 	int j;
 	int write;
 	int value;
+	int width = fractal_get_width(fractal);
+	int height = fractal_get_height(fractal);
 
-	for (i = 0; i < fractal->width; i++) {
-		for (j = 0; j < fractal->height; j++) {
+	for (i = 0; i < width; i++) {
+		for (j = 0; j < height; j++) {
 			value = fractal_compute_value(fractal, i, j);
 		}
 	}
+	printf("%d\n", height);
+	int result = write_bitmap_sdl(fractal, fractal_get_name(fractal));
+	printf("%d\n", height);
 }
+
+
+
+
+/* **************************
+*							*
+*       Fonction main 		*
+*							*
+************************** */
 
 int main(int argc, char* argv[]) {
 
-	/******************* Gère les différentes entrées possibles *******************/
+	/******* Gère les différentes entrées possibles *******/
 
     int optionD = 0;
     int files = argc-1;
     int maxthreads = 1;
     int thread = 0;
+	int count = 1;
+	struct fractal fract;
 
-    //printf("%d\n", argc);
-
-    int count = 1;
-
-    while (count <= files) {
+    while (count < files) {
     	if (strcmp(argv[count], "--maxthreads") == 0) {
     		thread = count;
     		maxthreads = atoi(argv[count+1]);
@@ -48,10 +63,9 @@ int main(int argc, char* argv[]) {
     	if (strcmp(argv[count], "-d") == 0) {
     		optionD = count;
     	}
-    	//printf("%s\n", argv[count]);
     	count++;
     }
-    //printf("%d\n", thread);
+
 
     if (thread != 0) {
     	files = files-2;
@@ -60,28 +74,35 @@ int main(int argc, char* argv[]) {
    		files = files-1;
    	}
 
+   	int files2 = files;
    	char *filesName[files];
    	int i = 0;
    	int j = 1;
    	while (files > 0) {
-   		if (j != thread && j != optionD && j != thread+1) {
-   			filesName[i] = argv[j];
-   			printf("%s\n", filesName[i]);
-   			i++;
-   			files--;
+   		if (thread != 0) {
+   			if (j != thread && j != optionD && j != thread+1) {
+   				filesName[i] = argv[j];
+   				i++;
+   				files--;
+   			}
+   		}
+   		else {
+   			   	if (j != optionD) {
+   				filesName[i] = argv[j];
+   				i++;
+   				files--;
+   			}
    		}
    		j++;
    	}
-   	//printf("%d\n", optionD);
-   	//printf("%d\n", maxthreads);	
 
-    int fileRunner = 0;//Pour le parcours du tableau contenant les noms d e fichiers
+   	/******************* Lecture des fichiers ******************/
 
-    /*  METHODE D E LECTURE DES FICHIERS*/
+    int fileRunner = 0;    //Pour le parcours du tableau contenant les noms d e fichiers
 
     FILE *file = NULL;
 
-    while(fileRunner < files-1)
+    while(fileRunner < files2-1)
     {
 
         /*Initialisation du fichier courant*/
@@ -103,11 +124,7 @@ int main(int argc, char* argv[]) {
           	int fractWidth;//""                  "" largeur
           	double fractA;//partie réèlle
           	double fractB;//partie imaginaire
-          	struct fractal *fract;
-          	{
-          		
-          	};
-
+      
           	//parcours le fichier ligne par ligne et crée une structure fractale
           	while(fgets(currentLine, 100, file) != NULL)
           	{     
@@ -168,15 +185,14 @@ int main(int argc, char* argv[]) {
               		}
               		j++;
             	}
-
-                fract->name = fractName;
-                fract->width = fractWidth;
-                fract->height = fractHeigth;
-                fract->a = fractA;
-                fract->b = fractB;
+            	fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
+            	printf("init");
+            	fractal_calcul(&fract);
+            	printf("win");
           	}
           	fclose(file);//ferme le flux de file   
           	fileRunner++;
     	}
   	}
+  	fractal_free(&fract);
 }//fin du main

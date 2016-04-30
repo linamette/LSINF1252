@@ -35,7 +35,7 @@ int write_bitmap_sdl(const struct fractal *f, const char *fname)
 
     back = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, RMASK, GMASK, BMASK, AMASK);
     if (!back)
-        return -1;
+        return -2;
 
     for (i = 0; i < w; i++) {
         for (j = 0; j < h; j++) {
