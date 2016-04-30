@@ -6,14 +6,26 @@
 
 char* add_char(char *word, char add)
 {
-  size_t l = strlen(word);
-  char *stock = (char *)malloc(l +1+1);
-  strcpy(stock, word);
-  stock[l] = add;
-  stock[l+1] = '\0';
-  return stock;
+  	size_t l = strlen(word);
+  	char *stock = (char *)malloc(l +1+1);
+  	strcpy(stock, word);
+  	stock[l] = add;
+  	stock[l+1] = '\0';
+  	return stock;
 }
 
+void fractal (struct fractal *fractal) {
+	int i;
+	int j;
+	int write;
+	int value;
+
+	for (i = 0; i < fractal->width; i++) {
+		for (j = 0; j < fractal->height; j++) {
+			value = fractal_compute_value(fractal, i, j);
+		}
+	}
+}
 
 int main(int argc, char* argv[]) {
 
@@ -83,88 +95,88 @@ int main(int argc, char* argv[]) {
         }
         else
         {
-          char *beginWord;//détemine le début de chaque mots dans la ligne
-          char *beginLine = NULL;//pointe vers el début de chaque ligne
+          	char *beginWord;//détemine le début de chaque mots dans la ligne
+          	char *beginLine = NULL;//pointe vers el début de chaque ligne
 
-          char *fractName ="";//prépare un string pour le nom du fractal
-          int fractHeigth;//prépare un int pour la hauteur des fichiers
-          int fractWidth;//""                  "" largeur
-          double fractA;//partie réèlle
-          double fractB;//partie imaginaire
+          	char *fractName ="";//prépare un string pour le nom du fractale
+          	int fractHeigth;//prépare un int pour la hauteur des fichiers
+          	int fractWidth;//""                  "" largeur
+          	double fractA;//partie réèlle
+          	double fractB;//partie imaginaire
+          	struct fractal *fract;
+          	{
+          		
+          	};
 
-          //parcours le fichier ligne par ligne et crée une structure fractale
-          while(fgets(currentLine, 100, file) != NULL)
-          {     
-            int i = 0;//compte les espaces
-            int j = 0;//curseur de caractères
-            beginWord ="";
-            beginLine = &currentLine[0];
-            //parcours la ligne en 'arretant à chaque espace pour enregister la donneé nécessaire
-            while(i < 5)
-            {
-              if(*(beginLine+j) ==' ')
-              {
-                if(i == 0)
-                { 
-                  fractName = beginWord;
-                  beginWord = "";
-                  //on a le nom du fractal
-                  i++;
-                }
-                else if (i == 1)
-                {
-                  fractWidth = atoi(beginWord);
-                  beginWord="";
-                  //on a la hauteur du fractacle
-                  i++;
-                }
-                else if (i == 2)
-                {
-                  fractHeigth = atoi(beginWord);
-                  beginWord = "";
-                  //on a la largeur du fractale
-                  i++;
-                }
-                else if (i == 3)
-                {
-                  fractA = atof(beginWord);
-                  beginWord="";
-                  //on a la valeur de a
+          	//parcours le fichier ligne par ligne et crée une structure fractale
+          	while(fgets(currentLine, 100, file) != NULL)
+          	{     
+            	int i = 0;//compte les espaces
+            	int j = 0;//curseur de caractères
+            	beginWord ="";
+            	beginLine = &currentLine[0];
+            	//parcours la ligne en 'arretant à chaque espace pour enregister la donneé nécessaire
+            	while(i < 5)
+            	{
+              		if(*(beginLine+j) ==' ')
+              		{
+                		if(i == 0)
+                		{ 
+                  			fractName = beginWord;
+                  			beginWord = "";
+                  			//on a le nom du fractal
+                  			i++;
+                		}
+                		else if (i == 1)
+                		{
+                  			fractWidth = atoi(beginWord);
+                  			beginWord="";
+                  			//on a la hauteur du fractacle
+                  			i++;
+                		}
+                		else if (i == 2)
+                		{
+                  			fractHeigth = atoi(beginWord);
+                  			beginWord = "";
+                  			//on a la largeur du fractale
+                  			i++;
+                		}
+                		else if (i == 3)
+                		{
+                  			fractA = atof(beginWord);
+                  			beginWord="";
+                  			//on a la valeur de a
+                  			i++;
+                		}
+                		else if (i == 4)
+                		{
+                  			fractB = atof(beginWord);
+                  			beginWord = "";
+                  			// on a la valeur de b
+                  			i++; 
+                		}
+               			else
+                		{
+                  			//programmus réparo
+                  			printf("probleme de cast\n");
+                  			return EXIT_FAILURE;
+                		}
+              		}
+              		else
+              		{
+                		beginWord = add_char(beginWord,*(beginLine+j));
+              		}
+              		j++;
+            	}
 
-                  i++;
-                }
-                else if (i == 4)
-                {
-                  fractB = atof(beginWord);
-                  beginWord = "";
-                  // on a la valeur de b
-                  i++; 
-                }
-                else
-                {
-                  //programmus réparo
-                  printf("probleme de cast\n");
-                  return EXIT_FAILURE;
-                }
-              }
-              else
-              {
-                beginWord = add_char(beginWord,*(beginLine+j));
-              }
-              j++;
-            }
-
-            /*ici je possède une fractale donc les attributs sont 
-            fractale *f;
                 fract->name = fractName;
                 fract->width = fractWidth;
                 fract->height = fractHeigth;
-                fract->a = a;
-                fract->b = b;
-            */
-          }
-          fclose(file);//ferme le flux de file   
-          fileRunner++;
-    }
-  }
+                fract->a = fractA;
+                fract->b = fractB;
+          	}
+          	fclose(file);//ferme le flux de file   
+          	fileRunner++;
+    	}
+  	}
 }//fin du main
