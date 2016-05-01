@@ -1,13 +1,15 @@
 #ifndef _FRACTAL_H
 #define _FRACTAL_H
 
+
 typedef struct fractal {
-	int width;
-	int height;
-	double a;
-	double b;
-	int **value;
-	char *name;
+    char *name;
+    int width;
+    int height;
+    double a;
+    double b;
+    double average;
+    int **values;
 } fractal;
 
 /*
@@ -43,7 +45,7 @@ const char *fractal_get_name(const struct fractal *f);
  * @f: fractale
  * @x: abscisse
  * @y: ordonnée
- * @return: valeur du pixel (x,y) de l'image de la fractale
+ * @return: valeur du pixel (x,y) de l'image de la fractale ou -1 en cas d'erreur
  */
 int fractal_get_value(const struct fractal *f, int x, int y);
 
@@ -61,7 +63,7 @@ void fractal_set_value(struct fractal *f, int x, int y, int val);
  * fractal_get_width: retourne la largeur de l'image de la fractale
  *
  * @f: fractale
- * @return: largeur
+ * @return: largeur 
  */
 int fractal_get_width(const struct fractal *f);
 
@@ -113,5 +115,9 @@ int fractal_compute_value(struct fractal *f, int x, int y);
  * @return: 0 si pas d'erreurs, -1 sinon
  */
 int write_bitmap_sdl(const struct fractal *f, const char *fname);
+
+double fractal_get_average(const struct fractal *f);
+
+void fractal_set_average(struct fractal *f, double average);
 
 #endif

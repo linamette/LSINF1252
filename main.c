@@ -24,12 +24,18 @@ void fractal_calcul (struct fractal *fractal) {
 	int value;
 	int width = fractal_get_width(fractal);
 	int height = fractal_get_height(fractal);
+	int calcul = 0;
 
 	for (i = 0; i < width; i++) {
 		for (j = 0; j < height; j++) {
 			value = fractal_compute_value(fractal, i, j);
+			calcul = calcul + fractal_get_value(fractal, i, j);
 		}
 	}
+
+    double average = (double) calcul / (double) (width*height);
+	fractal_set_average(fractal, average);
+
 	printf("%d\n", height);
 	int result = write_bitmap_sdl(fractal, fractal_get_name(fractal));
 	printf("%d\n", height);
@@ -194,5 +200,4 @@ int main(int argc, char* argv[]) {
           	fileRunner++;
     	}
   	}
-  	fractal_free(&fract);
 }//fin du main
