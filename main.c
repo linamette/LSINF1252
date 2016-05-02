@@ -17,28 +17,56 @@ char* add_char(char *word, char add)
 
 /************* Calcul de la fractal et transformation en Bitmap *********************/
 
-void fractal_calcul (struct fractal *fractal) {
-	int i;
-	int j;
-	int write;
-	int value;
-	int width = fractal_get_width(fractal);
-	int height = fractal_get_height(fractal);
-	int calcul = 0;
+void fractal_calcul (struct fractal *fractal, struct fractal *best_fract, int optionD) {
+	if (optionD != 0) {
+		int i;
+		int j;
+		int write;
+		int value;
+		int width = fractal_get_width(fractal);
+		int height = fractal_get_height(fractal);
+		int calcul = 0;
 
-	for (i = 0; i < width; i++) {
-		for (j = 0; j < height; j++) {
-			value = fractal_compute_value(fractal, i, j);
-			calcul = calcul + fractal_get_value(fractal, i, j);
+		for (i = 0; i < width; i++) {
+			for (j = 0; j < height; j++) {
+				value = fractal_compute_value(fractal, i, j);
+				calcul = calcul + fractal_get_value(fractal, i, j);
+			}
 		}
+
+    	double average = (double) calcul / (double) (width*height);
+		fractal_set_average(fractal, average);
+
+		printf("%d\n", height);
+		int result = write_bitmap_sdl(fractal, fractal_get_name(fractal));
+		printf("%d\n", height);
+	}
+	else {
+		int i;
+		int j;
+		int write;
+		int value;
+		int width = fractal_get_width(fractal);
+		int height = fractal_get_height(fractal);
+		int calcul = 0;
+
+		for (i = 0; i < width; i++) {
+			for (j = 0; j < height; j++) {
+				value = fractal_compute_value(fractal, i, j);
+				calcul = calcul + fractal_get_value(fractal, i, j);
+			}
+		}
+
+    	double average = (double) calcul / (double) (width*height);
+		fractal_set_average(fractal, average);
+
+		if (fractal_get_average(best_fract) < average) {
+			(*best_fract) = (*fractal);
+		}
+		printf("%d\n", height);
+		printf("%d\n", height);
 	}
 
-    double average = (double) calcul / (double) (width*height);
-	fractal_set_average(fractal, average);
-
-	printf("%d\n", height);
-	int result = write_bitmap_sdl(fractal, fractal_get_name(fractal));
-	printf("%d\n", height);
 }
 
 
@@ -60,6 +88,8 @@ int main(int argc, char* argv[]) {
     int thread = 0;
 	int count = 1;
 	struct fractal fract;
+	struct fractal best_fract;
+	fractal_set_average(&best_fract, -8000);
 
     while (count < files) {
     	if (strcmp(argv[count], "--maxthreads") == 0) {
@@ -193,11 +223,14 @@ int main(int argc, char* argv[]) {
             	}
             	fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
             	printf("init");
-            	fractal_calcul(&fract);
+            	fractal_calcul(&fract, &best_fract, optionD);
             	printf("win");
           	}
           	fclose(file);//ferme le flux de file   
           	fileRunner++;
     	}
+  	}
+  	if (optionD == 0) {
+  		int result = write_bitmap_sdl(&best_fract, fractal_get_name(&best_fract));
   	}
 }//fin du main
