@@ -30,9 +30,6 @@ pthread_t *consumer;
 pthread_t *producer;
 
 
-
-
-
 /* ***************************************************************************
 *							                                                 *
 *                           Gestion du buffer 		                         *
@@ -61,8 +58,6 @@ struct fractal pick_fractal () {
 }
 
 
-
-
 /* ***************************************************************************
 *							                                                 *
 *                          Producteur & consommateur 		                 *
@@ -70,16 +65,19 @@ struct fractal pick_fractal () {
 *****************************************************************************/
 
 void *consumer_function () {
+  printf("consummer lancé\n");
 	fractal *fract;
 	fract = (fractal*) malloc(sizeof(fractal));
 
+  printf("avant tout va bien\n");
 	sem_wait(&full);
 	pthread_mutex_lock(&mutex);
 	(*fract) = pick_fractal();
 	pthread_mutex_unlock(&mutex);
 	sem_post(&empty);
 
-		
+  printf(" apres aussi optionD %d\n",optionD);		
+
 	if (optionD != 0) {
 		int i;
 		int j;
@@ -130,6 +128,7 @@ void *consumer_function () {
 
 }
 
+/*ajoute un caractère à un mot*/
 char* add_char(char *word, char add) {
   	size_t l = strlen(word);
   	char *stock = (char *)malloc(l +1+1);
@@ -140,6 +139,8 @@ char* add_char(char *word, char add) {
 }
 
 void *producer_function (void *fileName) {
+
+    printf("producer lancé\n");
     FILE *file = NULL;
     char currentLine[100]="";//utilisé par fgets suppose que les lignes des fichiers ne dépassent pas 100 char
     char *beginWord;//détemine le début de chaque mots dans la ligne
@@ -154,7 +155,7 @@ void *producer_function (void *fileName) {
     struct fractal fract;
 
     /*Initialisation du fichier courant*/
-    file = fopen(fileName,"r");
+    file = fopen((char *)fileName,"r");
 
     if(file == NULL) {
     printf("une erreur s'est produite lors de l'initalisation de file\n");
@@ -211,7 +212,7 @@ void *producer_function (void *fileName) {
               	j++;
             }
             fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
-            printf("init");
+            printf("initialisation terminée");
             sem_wait(&empty);
             pthread_mutex_lock(&mutex);
             insert(fract);
@@ -311,11 +312,13 @@ int main(int argc, char* argv[]) {
 
    	for (y =0; y < files2-1; y++) {
    		err = pthread_create(&producer[y], NULL, producer_function, (void*) filesName[y]);
+		err = pthread_join(producer[y],NULL);
    	}
 
    	printf("producer\n");
    	for (z = 0; z < maxthreads; z++) {
    		err = pthread_create(&consumer[z], NULL, consumer_function, NULL);
+		err = pthread_join(consumer[z],NULL);
    	}
 
    	printf("consumer\n");
