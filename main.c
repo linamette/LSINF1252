@@ -312,12 +312,13 @@ int main(int argc, char* argv[]) {
 
    	for (y =0; y < files2-1; y++) {
    		err = pthread_create(&producer[y], NULL, producer_function, (void*) filesName[y]);
-		err = pthread_join(producer[y],NULL);
+   		err = pthread_create(&consumer[y], NULL, consumer_function, NULL);
+
    	}
 
    	printf("producer\n");
    	for (z = 0; z < maxthreads; z++) {
-   		err = pthread_create(&consumer[z], NULL, consumer_function, NULL);
+   		err = pthread_join(producer[z],NULL);
 		err = pthread_join(consumer[z],NULL);
    	}
 
