@@ -120,4 +120,6 @@ double fractal_get_average(const struct fractal *f);
 
 void fractal_set_average(struct fractal *f, double average);
 
+void fractal_set_height(fractal *f, int height);
+
 #endif

@@ -5,22 +5,22 @@
 
 struct fractal *fractal_new(const char *name, int width, int height, double a, double b)
 {
-    fractal *fractal = (fractal *) malloc(sizeof(fractal));
+    fractal *fract = (fractal *) malloc(sizeof(fractal));
 
-    fractal->width = width;
-    fractal->height = height;
-    fractal->a = a;
-    fractal->b = b;
+    fract->width = width;
+    fract->height = height;
+    fract->a = a;
+    fract->b = b;
     char *fractal_name = (char *) malloc(sizeof(char)*strlen(name));
 
     fractal_name = strncpy(fractal_name, name, strlen(name));
-    fractal->name = fractal_name;
-    fractal->values = (int **) malloc(width*sizeof(*(fractal->values)));
+    fract->name = fractal_name;
+    fract->values = (int **) malloc(width*sizeof(*(fract->values)));
 
     for (int i = 0; i < width; i++) {
-        (fractal->values)[i] = (int *) malloc(height*sizeof(**(fractal->values)));
+        (fract->values)[i] = (int *) malloc(height*sizeof(**(fract->values)));
     }
-    return fractal;
+    return fract;
 }
 
 void fractal_free(struct fractal *f)
@@ -56,6 +56,10 @@ int fractal_get_width(const struct fractal *f)
 int fractal_get_height(const struct fractal *f)
 {
     return f->height;
+}
+
+void fractal_set_height(fractal *f, int height) {
+    f->height = height;
 }
 
 double fractal_get_a(const struct fractal *f)
