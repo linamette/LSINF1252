@@ -19,6 +19,8 @@ int maxthreads;
 int optionD;
 
 pthread_mutex_t mutex;
+pthread_mutex_t mutex2;
+pthread_mutex_t mutex3;
 sem_t empty;
 sem_t full;
 
@@ -26,8 +28,11 @@ fractal *buffer;
 int buffer_size;
 fractal *best_fract;
 
-pthread_t *consumer;
-pthread_t *producer;
+int fractal_add = 0;
+int fractal_pick = -1;
+
+int end = 1;
+int computedone = 0;
 
 
 /* ***************************************************************************
@@ -39,21 +44,23 @@ pthread_t *producer;
 void insert (fractal fractal) {
 	struct fractal *current = buffer;
 	int i ;
-	for (i = 0; fractal_get_height(&fractal) != 0 && i < buffer_size; i++) {
+	for (i = 0; fractal_get_height(current) != 0 && i < buffer_size; i++) {
 		current++;
 	}
 	*current = fractal;
+	fractal_add++;
 }
 
 struct fractal pick_fractal () {
 	fractal *current = buffer;
 	struct fractal fractal;
 	int i;
-	for (i = 0; current->width == 0 && i < buffer_size; i++) {
+	for (i = 0; fractal_get_height(current) == 0 && i < buffer_size; i++) {
 		current++;
 	}
 	fractal = *current;
 	fractal_set_height(current, 0);
+	fractal_pick++;
 	return fractal;
 }
 
@@ -65,67 +72,79 @@ struct fractal pick_fractal () {
 *****************************************************************************/
 
 void *consumer_function () {
-  printf("consummer lancé\n");
-	fractal *fract;
-	fract = (fractal*) malloc(sizeof(fractal));
+		if (computedone == fractal_add) {
+			return NULL;
+		}
+		printf("consummer lancé\n");
+		fractal *fract;
+		fract = (fractal*) malloc(sizeof(fractal));
 
-  printf("avant tout va bien\n");
-	sem_wait(&full);
-	pthread_mutex_lock(&mutex);
-	(*fract) = pick_fractal();
-	pthread_mutex_unlock(&mutex);
-	sem_post(&empty);
+  		printf("avant tout va bien\n");
+		sem_wait(&full);
+		pthread_mutex_lock(&mutex);
+		(*fract) = pick_fractal();
+		pthread_mutex_unlock(&mutex);
+		sem_post(&empty);
 
-  printf(" apres aussi optionD %d\n",optionD);		
+  		printf(" apres aussi optionD %d\n",optionD);		
 
-	if (optionD != 0) {
-		int i;
-		int j;
-		int write;
-		int value;
-		int width = fractal_get_width(fract);
-		int height = fractal_get_height(fract);
-		int calcul = 0;
-		for (i = 0; i < width; i++) {
-			for (j = 0; j < height; j++) {
-				value = fractal_compute_value(fract, i, j);
-				calcul = calcul + fractal_get_value(fract, i, j);
+		if (optionD != 0) {
+			int i;
+			int j;
+			int write;
+			int value;
+			int width = fractal_get_width(fract);
+			int height = fractal_get_height(fract);
+			int calcul = 0;
+			for (i = 0; i < width; i++) {
+				for (j = 0; j < height; j++) {
+					value = fractal_compute_value(fract, i, j);
+					calcul = calcul + fractal_get_value(fract, i, j);
+				}
 			}
+
+    		double average = (double) calcul / (double) (width*height);
+			fractal_set_average(fract, average);
+
+			printf("%d\n", height);
+			int result = write_bitmap_sdl(fract, fractal_get_name(fract));
+			pthread_mutex_lock(&mutex2);
+				if (fractal_get_average(best_fract) < average) {
+					*best_fract = (*fract);
+				}
+				computedone++;
+			pthread_mutex_unlock(&mutex2);
+			printf("%d\n", height);
 		}
-
-    	double average = (double) calcul / (double) (width*height);
-		fractal_set_average(fract, average);
-
-		printf("%d\n", height);
-		int result = write_bitmap_sdl(fract, fractal_get_name(fract));
-		printf("%d\n", height);
-	}
-	else {
-		int i;
-		int j;
-		int write;
-		int value;
-		int width = fractal_get_width(fract);
-		int height = fractal_get_height(fract);
-		int calcul = 0;
-		for (i = 0; i < width; i++) {
-			for (j = 0; j < height; j++) {
-				value = fractal_compute_value(fract, i, j);
-				calcul = calcul + fractal_get_value(fract, i, j);
+		else {
+			int i;
+			int j;
+			int write;
+			int value;
+			int width = fractal_get_width(fract);
+			int height = fractal_get_height(fract);
+			int calcul = 0;
+			for (i = 0; i < width; i++) {
+				for (j = 0; j < height; j++) {
+					value = fractal_compute_value(fract, i, j);
+					calcul = calcul + fractal_get_value(fract, i, j);
+				}
 			}
-		}
 
-    	double average = (double) calcul / (double) (width*height);
-		fractal_set_average(fract, average);
+    		double average = (double) calcul / (double) (width*height);
+			fractal_set_average(fract, average);
 
-		if (fractal_get_average(best_fract) < average) {
-			*best_fract = (*fract);
+			pthread_mutex_lock(&mutex2);
+				if (fractal_get_average(best_fract) < average) {
+					*best_fract = (*fract);
+				}
+				computedone++;
+			pthread_mutex_unlock(&mutex2);
+			printf("%d\n", height);
 		}
-		printf("%d\n", height);
-		printf("%d\n", height);
-	}
+						printf("%d\n", computedone);
+				printf("%d\n", fractal_add);
 	return NULL;
-
 }
 
 /*ajoute un caractère à un mot*/
@@ -292,39 +311,88 @@ int main(int argc, char* argv[]) {
    	best_fract = (fractal*) malloc(sizeof(fractal));
    	fractal_set_average(best_fract, -8000);
    	pthread_mutex_init (&mutex, NULL);
+   	pthread_mutex_init (&mutex2, NULL);
+   	pthread_mutex_init (&mutex3, NULL);
    	sem_init (&empty, 0, buffer_size);
     sem_init (&full, 0, 0);
    	buffer = (fractal*) malloc(buffer_size*sizeof(fractal));
    	struct fractal fract = *fractal_new("empty_slot", 0, 0, 0.0, 0.0);
-   	int err;
-   	int x;
-   	int y;
-   	int z;
-   	consumer = malloc((files2-1)*sizeof(pthread_t));
-   	producer = malloc(maxthreads*sizeof(pthread_t));
+   	int consumer = files2-1;
+   	printf("%d\n", consumer);
 
+   	for(i = 0;i < buffer_size;i++)
+	{
+		*(buffer+i) = fract;
+	}
 
-   	for (x = 0; x < buffer_size; x++) {
-   		*(buffer+x) = fract;
-   	}
+   	pthread_t threads[consumer+maxthreads];
+	int success;
 
-   	printf("Hello\n");
+	for(i = 0;i < consumer+maxthreads;i++)
+	{
+		if(i<consumer)
+		{	
+				success = pthread_create(&(threads[i]),NULL,(void*) &producer_function,(void*) filesName[i]);	
+		}
+		else
+		{
+			success = pthread_create(&(threads[i]),NULL,(void*) &consumer_function,NULL);
+		}
+		if(success != 0)
+		{
+			fprintf(stderr,"Erreur: initialisation thread\n");
+			exit(EXIT_FAILURE);
+		}
+	}
 
-   	for (y =0; y < files2-1; y++) {
-   		err = pthread_create(&producer[y], NULL, producer_function, (void*) filesName[y]);
-   		err = pthread_create(&consumer[y], NULL, consumer_function, NULL);
+	int busy;
+	int readerdone = 0;
+	i = 0;
+	while(1)
+	{
+		busy = 1;
+		if(i < consumer && readerdone < consumer)
+		{
+			busy = pthread_tryjoin_np(threads[i],NULL);
+		}
+		else if(i >= consumer)
+		{
+			busy = pthread_tryjoin_np(threads[i],NULL);
+		}
+		if(busy == 0)
+		{
+			if(i < consumer)
+			{
+				readerdone++;
+				printf("un reader fini\n");
+			}
+			else // si thread de calcul
+			{
+				
+				if(readerdone == consumer && computedone == fractal_add) // lecture terminée et toutes les fractales ont déjà été prises en charge par un thread
+				{
+				
+					for(i = consumer;i<consumer+maxthreads;i++)
+					{
+						pthread_cancel(threads[i]);
+					}
+					int result = write_bitmap_sdl(best_fract, fractal_get_name(best_fract));
+					return 1;
+				}
+				pthread_create(&(threads[i]),NULL,(void*) &consumer_function,NULL);
+			}
+		}
+		if(readerdone < consumer)
+		{
+			i = (i+1) % (consumer+maxthreads);
+		}
+		else // tous les fichiers sont lus donc ne parcourt que les threads de calcul
+		{
+			i = consumer + (i+1) % maxthreads;
+		}
+	}
 
-   	}
-
-   	printf("producer\n");
-   	for (z = 0; z < maxthreads; z++) {
-   		err = pthread_join(producer[z],NULL);
-		err = pthread_join(consumer[z],NULL);
-   	}
-
-   	printf("consumer\n");
-  	if (optionD == 0) {
-  		int result = write_bitmap_sdl(best_fract, filesName[files2-1]);
-  	}
   	printf("consumer\n");
+  	printf("%d\n", fractal_add);
+  	printf("%d\n", fractal_pick);
 }//fin du main
