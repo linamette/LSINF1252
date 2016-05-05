@@ -15,6 +15,7 @@
 *							                                                  *
 ******************************************************************************/
 int maxthreads;					//nombre de threads
+int terminal;					//gère l'option "-"
 int optionD;					//Print toutes les fractales ou non
 fractal *best_fract;			//adresse vers la plus grande fractal
 
@@ -95,12 +96,9 @@ void *consumer_function () {
 	fractal_set_average(fract, average);
 
 	if (optionD != 0) {													//print ou pas toutes les fractals
-		printf("%d\n", height);
 		int result = write_bitmap_sdl(fract, fractal_get_name(fract));
-		printf("%d\n", height);
 	}
 	else {
-		printf("%d\n", height);
 	}
 
 	pthread_mutex_lock(&mutex2);						//Change la bestfractal et change la varible d'arret
@@ -110,8 +108,6 @@ void *consumer_function () {
 	computedone++;
 	pthread_mutex_unlock(&mutex2);
 
-	printf("%d\n", computedone);
-	printf("%d\n", fractal_add);
 	free(fract);
 	return NULL;
 }
@@ -198,7 +194,6 @@ void *producer_function (void *fileName) {
               	j++;
             }
             struct fractal fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
-            printf("initialisation terminée");
             sem_wait(&empty);
             pthread_mutex_lock(&mutex);
             insert(fract);
@@ -212,7 +207,85 @@ void *producer_function (void *fileName) {
 }
 
 
+void *producer_function_stdin () {		//utilisé par fgets suppose que les lignes des fichiers ne dépassent pas 100 char
+    char *beginWord;				//détemine le début de chaque mots dans la ligne
+  	char *beginLine = NULL;	
+  	char currentLine[100] = "";		//pointe vers el début de chaque ligne
+  	char scan[3] = "oui";
 
+    char *fractName ="";			//prépare un string pour le nom du fractale
+    int fractHeigth;				//prépare un int pour la hauteur des fichiers
+    int fractWidth;					//""                  "" largeur
+    double fractA;					//partie réèlle
+    double fractB;					//partie imaginaire
+
+    int h;
+	for (h = 0; strcmp(scan,"oui") == 0 && h < 10; h++) {
+        //parcours le fichier ligne par ligne et crée une structure fractale
+        	printf("Veuillez entrer une fractal : fractName width height a b\n");
+			fgets(currentLine, 100, stdin);
+			printf("Voulez-vous entrer une nouvelle fracal ? (oui ou non)\n");
+			fgets(scan, 4, stdin);
+        	fgets(currentLine, 100, stdin);  
+           	int i = 0;//compte les espaces
+            int j = 0;//curseur de caractères
+            beginWord ="";
+            beginLine = &currentLine[0];
+            //parcours la ligne en 'arretant à chaque espace pour enregister la donneé nécessaire
+            while(i < 5) {
+              	if(*(beginLine+j) ==' ') {
+                	if(i == 0) { 
+                  		fractName = beginWord;
+                  		beginWord = "";
+                  		//on a le nom du fractal
+                  		i++;
+                	}
+                	else if (i == 1) {
+                  		fractWidth = atoi(beginWord);
+                  		beginWord="";
+                  		//on a la hauteur du fractacle
+                  		i++;
+                	}
+                	else if (i == 2) {
+                  		fractHeigth = atoi(beginWord);
+                  		beginWord = "";
+                  		//on a la largeur du fractale
+                  		i++;
+                	}
+                	else if (i == 3) {
+                  		fractA = atof(beginWord);
+                  		beginWord="";
+                  		//on a la valeur de a
+                  		i++;
+                	}
+                	else if (i == 4) {
+                  		fractB = atof(beginWord);
+                  		beginWord = "";
+                  		// on a la valeur de b
+                  		i++; 
+                	}
+               		else {
+                  		//programmus réparo
+                  		printf("probleme de cast\n");
+                  		exit(EXIT_FAILURE);
+                	}
+              	}
+              	else {
+                	beginWord = add_char(beginWord,*(beginLine+j));
+              	}
+              	j++;
+            }
+            struct fractal fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
+            sem_wait(&empty);
+            pthread_mutex_lock(&mutex);
+            insert(fract);
+            pthread_mutex_unlock(&mutex);
+            sem_post(&full);
+            terminal = 0;
+ 											//////////////////////////    ATTENTION METHODE FREE     ////////////////////
+    }
+    return NULL;
+}
 
 /* ***************************************************************************
 *							                                                 *
@@ -228,14 +301,21 @@ int main(int argc, char* argv[]) {
 	int count = 1;
 	maxthreads = 1;
 	optionD = 0;
+	terminal = 0;
 
     while (count < files) {
     	if (strcmp(argv[count], "--maxthreads") == 0) {
     		thread = count;
     		maxthreads = atoi(argv[count+1]);
+    		if (maxthreads <= 0) {
+    			maxthreads = 1;
+    		}
     	}
     	if (strcmp(argv[count], "-d") == 0) {
     		optionD = count;
+    	}
+    	if (strcmp(argv[count], "-") == 0) {
+    		terminal = count;
     	}
     	count++;
     }
@@ -247,6 +327,9 @@ int main(int argc, char* argv[]) {
    	if (optionD != 0) {
    		files = files-1;
    	}
+   	if (terminal != 0) {
+   		files = files-1;
+   	}
 
    	int files2 = files;
    	char *filesName[files];
@@ -254,14 +337,14 @@ int main(int argc, char* argv[]) {
    	int j = 1;
    	while (files > 0) {
    		if (thread != 0) {
-   			if (j != thread && j != optionD && j != thread+1) {
+   			if (j != thread && j != optionD && j != thread+1 && j != terminal) {
    				filesName[i] = argv[j];
    				i++;
    				files--;
    			}
    		}
    		else {
-   			   	if (j != optionD) {
+   			   	if (j != optionD && j != terminal) {
    				filesName[i] = argv[j];
    				i++;
    				files--;
@@ -269,12 +352,12 @@ int main(int argc, char* argv[]) {
    		}
    		j++;
    	}
-   	printf("Hello\n");
+
 
    	/******************* Lancement des threads ******************/
    	int producer = files2-1;
    	int err;
-   	buffer_size = 2*maxthreads;
+   	buffer_size = 10+(2*maxthreads);
    	buffer = (fractal*) malloc(buffer_size*sizeof(fractal));
 
    	best_fract = (fractal*) malloc(sizeof(fractal));
@@ -296,6 +379,10 @@ int main(int argc, char* argv[]) {
 
 	free(fract);
 
+	if (terminal != 0) {
+		producer_function_stdin();
+	}
+
 	for(i = 0;i < producer+maxthreads;i++)
 	{
 		if(i<producer)
@@ -312,6 +399,7 @@ int main(int argc, char* argv[]) {
 			exit(EXIT_FAILURE);
 		}
 	}
+
 
 	int fractal_pick = 0;
 	int result;
@@ -347,7 +435,7 @@ int main(int argc, char* argv[]) {
 		{
 			i = producer + (i+1) % maxthreads;
 		}
-		if(fractal_pick == producer && computedone == fractal_add) {
+		if(fractal_pick == producer && computedone == fractal_add && terminal == 0) {
 			for(i = producer; i< producer+maxthreads; i++)
 			{
 				pthread_cancel(threads[i]);
@@ -359,3 +447,4 @@ int main(int argc, char* argv[]) {
 		}
 	}
 }//fin du main
+
