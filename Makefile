@@ -37,5 +37,4 @@ lib:
 .PHONY: test
 
 test:
-	rm -rf *o
-	rm -rf main
+	make -C test/
