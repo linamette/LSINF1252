@@ -145,53 +145,59 @@ void *producer_function (void *fileName) {
     else {
         //parcours le fichier ligne par ligne et crée une structure fractale
         while(fgets(currentLine, 100, file) != NULL) {     
-           	int i = 0;//compte les espaces
+           	if(currentLine[0] == '\n' || currentLine[0] == '#')
+            {
+              //on ignore cette ligne
+            }
+            else
+            {
+              int i = 0;//compte les espaces
             int j = 0;//curseur de caractères
             beginWord ="";
             beginLine = &currentLine[0];
             //parcours la ligne en 'arretant à chaque espace pour enregister la donneé nécessaire
             while(i < 5) {
-              	if(*(beginLine+j) ==' ') {
-                	if(i == 0) { 
-                  		fractName = beginWord;
-                  		beginWord = "";
-                  		//on a le nom du fractal
-                  		i++;
-                	}
-                	else if (i == 1) {
-                  		fractWidth = atoi(beginWord);
-                  		beginWord="";
-                  		//on a la hauteur du fractacle
-                  		i++;
-                	}
-                	else if (i == 2) {
-                  		fractHeigth = atoi(beginWord);
-                  		beginWord = "";
-                  		//on a la largeur du fractale
-                  		i++;
-                	}
-                	else if (i == 3) {
-                  		fractA = atof(beginWord);
-                  		beginWord="";
-                  		//on a la valeur de a
-                  		i++;
-                	}
-                	else if (i == 4) {
-                  		fractB = atof(beginWord);
-                  		beginWord = "";
-                  		// on a la valeur de b
-                  		i++; 
-                	}
-               		else {
-                  		//programmus réparo
-                  		printf("probleme de cast\n");
-                  		exit(EXIT_FAILURE);
-                	}
-              	}
-              	else {
-                	beginWord = add_char(beginWord,*(beginLine+j));
-              	}
-              	j++;
+                if(*(beginLine+j) ==' ') {
+                  if(i == 0) { 
+                      fractName = beginWord;
+                      beginWord = "";
+                      //on a le nom du fractal
+                      i++;
+                  }
+                  else if (i == 1) {
+                      fractWidth = atoi(beginWord);
+                      beginWord="";
+                      //on a la hauteur du fractacle
+                      i++;
+                  }
+                  else if (i == 2) {
+                      fractHeigth = atoi(beginWord);
+                      beginWord = "";
+                      //on a la largeur du fractale
+                      i++;
+                  }
+                  else if (i == 3) {
+                      fractA = atof(beginWord);
+                      beginWord="";
+                      //on a la valeur de a
+                      i++;
+                  }
+                  else if (i == 4) {
+                      fractB = atof(beginWord);
+                      beginWord = "";
+                      // on a la valeur de b
+                      i++; 
+                  }
+                  else {
+                      //programmus réparo
+                      printf("probleme de cast\n");
+                      exit(EXIT_FAILURE);
+                  }
+                }
+                else {
+                  beginWord = add_char(beginWord,*(beginLine+j));
+                }
+                j++;
             }
             struct fractal fract = *fractal_new(fractName, fractWidth, fractHeigth, fractA, fractB);
             sem_wait(&empty);
@@ -199,6 +205,7 @@ void *producer_function (void *fileName) {
             insert(fract);
             pthread_mutex_unlock(&mutex);
             sem_post(&full);
+            }
  											//////////////////////////    ATTENTION METHODE FREE     /////////////////////////
         }
         fclose(file);//ferme le flux de file  
