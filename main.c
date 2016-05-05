@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -79,15 +80,14 @@ void *consumer_function () {
 	sem_post(&empty);							//prend une fractal dans le buffer		
 
 	int i;		
-	int j;
-	int value;									//calul de Julia
+	int j;									//calul de Julia
 	int width = fractal_get_width(fract);
 	int height = fractal_get_height(fract);
 	int calcul = 0;								//Calcul de la moyenne
 
 	for (i = 0; i < width; i++) {								//boucle de Julia et de la moyenne
 		for (j = 0; j < height; j++) {
-			value = fractal_compute_value(fract, i, j);
+			fractal_compute_value(fract, i, j);
 			calcul = calcul + fractal_get_value(fract, i, j);
 			}
 	}
@@ -96,7 +96,7 @@ void *consumer_function () {
 	fractal_set_average(fract, average);
 
 	if (optionD != 0) {													//print ou pas toutes les fractals
-		int result = write_bitmap_sdl(fract, fractal_get_name(fract));
+		write_bitmap_sdl(fract, fractal_get_name(fract));
 	}
 	else {
 	}
@@ -402,7 +402,6 @@ int main(int argc, char* argv[]) {
 
 
 	int fractal_pick = 0;
-	int result;
 
 	i = 0;
 	while(1)
@@ -440,7 +439,7 @@ int main(int argc, char* argv[]) {
 			{
 				pthread_cancel(threads[i]);
 			}
-			result = write_bitmap_sdl(best_fract, fractal_get_name(best_fract));
+			write_bitmap_sdl(best_fract, fractal_get_name(best_fract));
 			pthread_mutex_destroy(&mutex);
 			pthread_mutex_destroy(&mutex2);
 			return 1;
