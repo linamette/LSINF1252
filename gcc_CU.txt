@@ -1,1 +1,0 @@
-gcc unitary_test.c libfractal/libfractal.a $(pkg-config --cflags --libs sdl) -lcunit -o first_test

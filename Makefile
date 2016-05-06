@@ -24,6 +24,7 @@ clean:
 	rm -rf *o
 	rm -rf main
 	make clean -C libfractal/
+	make clean -C test/
 
 ###############################################################################	
 
@@ -36,5 +37,5 @@ lib:
 
 .PHONY: test
 
-test:
-	make -C test/
+test: 
+	make -C test/ 
