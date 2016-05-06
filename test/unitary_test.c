@@ -92,7 +92,7 @@ int test_ashtag(void)
 
 	hashtag = (char *)malloc(sizeof(char));
 
-	fgets(hashtag,1,filea);
+	fgets(hashtag,2,filea);
 
 	return 0;
 
@@ -240,8 +240,6 @@ int main(int argc, const char *argv[])
 	CU_pSuite t2 = NULL;
 	CU_pSuite t3 = NULL;
 	CU_pSuite t4 = NULL;
-	//CU_pSuite t5 = NULL;
-	/*vérification de l'initialisation de suite de tests*/
 	if(CUE_SUCCESS != CU_initialize_registry())
 	{
 		return CU_get_error();
@@ -255,7 +253,6 @@ int main(int argc, const char *argv[])
 	t2 = CU_add_suite("test2", test_ashtag,NULL);
 	t3 = CU_add_suite("test3",at_line_test,NULL);
 	t4 = CU_add_suite("test4",test_loader,free_init);
-	//t5 = CU_add_suite("test5",initialize_test6,clean_test6);
 
 	if(NULL == t0 || NULL == t1 || NULL == t2 || NULL == t3 || NULL == t4)
 	{
