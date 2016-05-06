@@ -428,7 +428,7 @@ int main(int argc, char* argv[]) {
 			{
 				pthread_cancel(threads[i]);
 			}
-			write_bitmap_sdl(best_fract, fractal_get_name(best_fract));
+			write_bitmap_sdl(best_fract, filesName[files2-1]);
 			pthread_mutex_destroy(&mutex);
 			pthread_mutex_destroy(&mutex2);
 			return 1;
