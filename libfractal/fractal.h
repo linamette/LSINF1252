@@ -122,4 +122,8 @@ void fractal_set_average(struct fractal *f, double average);
 
 void fractal_set_height(fractal *f, int height);
 
+/*ajoute un caractère à un mot*/
+char* add_char(char *word, char add);
+
+
 #endif

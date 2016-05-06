@@ -101,3 +101,13 @@ int fractal_compute_value(struct fractal *f, int x, int y)
 
     return val;
 }
+
+/*ajoute un caractère à un mot*/
+char* add_char(char *word, char add) {
+    size_t l = strlen(word);
+    char *stock = (char *)malloc(l +1+1);
+    strcpy(stock, word);
+    stock[l] = add;
+    stock[l+1] = '\0';
+    return stock;
+}
